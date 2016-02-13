@@ -1,0 +1,12 @@
+[package]
+name = "cucumber"
+version = "0.1.0"
+authors = ["Alex McArther <acmcarther@gmail.com>"]
+
+[dependencies]
+regex = "*"
+hyper = "*"
+
+[[example]]
+name = "calculator"
+path = "examples/calculator/features/cuke.rs"
