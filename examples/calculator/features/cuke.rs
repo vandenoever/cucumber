@@ -1,3 +1,5 @@
+fn main() {}
+/*
 extern crate cucumber;
 
 mod step_definitions;
@@ -48,3 +50,4 @@ fn main() {
     loop { thread::sleep(std::time::Duration::new(10000,0)); }
   }).join();
 }
+*/

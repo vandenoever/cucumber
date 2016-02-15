@@ -1,13 +1,14 @@
+/*
 use runner::Runner;
 
 use std::sync::{Arc, Mutex};
 use std::io::Read;
+use std::io::Write;
 
-use hyper::Server as HyperServer;
-use hyper::server::Request;
-use hyper::server::Response;
-use hyper::server::Handler;
-use hyper::server::Listening;
+use std::thread;
+use std::thread::{JoinHandle};
+
+use std::net::TcpListener;
 
 #[allow(dead_code)]
 pub struct Server<World: Send + Sync> {
@@ -15,7 +16,7 @@ pub struct Server<World: Send + Sync> {
   muh_msg: String
 }
 
-pub type ServerHandle = Listening;
+pub type ServerHandle = JoinHandle<()>;
 
 #[allow(dead_code)]
 impl <World: Send + Sync> Server<World> {
@@ -29,16 +30,22 @@ impl <World: Send + Sync> Server<World> {
     println!("A server was started");
     let addr = addr.unwrap_or("0.0.0.0:7878");
     let server = Arc::new(Mutex::new(self));
-    HyperServer::http(&addr)
-      .unwrap()
-      .handle(move |mut req: Request, res: Response| {
-        let mut body = String::new();
-        req.read_to_string(&mut body).unwrap();
-        println!("heres a req [{}]", body);
-        println!("muh message is, as always, {}", server.lock().unwrap().muh_msg);
-        res.send(b"[\"success\", []]").unwrap();
-      }).unwrap()
+    thread::spawn(move || {
+      let listener = TcpListener::bind(addr).unwrap();
+      let mut body = String::new();
+
+      let (mut stream, addr) = listener.accept().unwrap();
+
+      println!("addr: {}", addr);
+
+      loop {
+        let _ = stream.read_to_string(&mut body).unwrap();
+        println!("Recv: {}", body);
+        let _ = stream.write(b"[\"success\", []]");
+      }
+    })
   }
+
 }
 
 #[cfg(test)]
@@ -115,3 +122,4 @@ mod test {
   }
   */
 }
+*/

@@ -1,3 +1,4 @@
+/*
 use cucumber::{ Step, Cucumber, MatchError, CucumberRegistrar };
 use regex::Regex;
 
@@ -142,3 +143,4 @@ mod test {
     assert_eq!(result, Err(ExecuteError::MatchFailure(MatchError::NoMatchingSteps)));
   }
 }
+*/
