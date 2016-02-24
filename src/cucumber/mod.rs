@@ -106,15 +106,33 @@ mod test {
   }
 
   #[test]
-  fn cuke_add_steps() {
+  fn cuke_add_step() {
     type World = u32;
-
-    let mut world = 5;
     let mut cuke: Cucumber<World> = Cucumber::new();
-
     cuke.given(r("^I do a basic thing$"), Box::new(move |_, _| {}));
+  }
+
+  #[test]
+  fn cuke_find_match() {
+    type World = u32;
+    let mut cuke: Cucumber<World> = Cucumber::new();
+    cuke.given(r("^I do a basic thing$"), Box::new(move |_, _| {}));
+
     let step_id = cuke.find_match("I do a basic thing");
     assert!(step_id.is_ok());
+  }
+
+  #[test]
+  fn cuke_get_step() {
+    type World = u32;
+
+    let mut cuke: Cucumber<World> = Cucumber::new();
+    cuke.given(r("^I do a basic thing$"), Box::new(move |_, _| {}));
+
+    let step_id = cuke.find_match("I do a basic thing").unwrap();
+
+    let step = cuke.step(step_id);
+    let mut world = 5;
   }
 
   /*

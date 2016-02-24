@@ -1,5 +1,6 @@
 extern crate regex;
 extern crate hyper;
+extern crate rustc_serialize;
 
 mod cucumber;
 mod runner;

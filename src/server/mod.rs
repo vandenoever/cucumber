@@ -1,5 +1,7 @@
-/*
-use runner::Runner;
+mod request;
+mod response;
+
+//use runner::Runner;
 
 use std::sync::{Arc, Mutex};
 use std::io::Read;
@@ -10,9 +12,12 @@ use std::thread::{JoinHandle};
 
 use std::net::TcpListener;
 
+use std::marker::PhantomData;
+
 #[allow(dead_code)]
 pub struct Server<World: Send + Sync> {
-  runner: Runner<World>,
+  //runner: Runner<World>,
+  temp: PhantomData<World>,
   muh_msg: String
 }
 
@@ -21,8 +26,8 @@ pub type ServerHandle = JoinHandle<()>;
 #[allow(dead_code)]
 impl <World: Send + Sync> Server<World> {
 
-  pub fn new(runner: Runner<World>) -> Server<World> {
-    Server { runner: runner, muh_msg: "Hullo".to_owned() }
+  pub fn new() -> Server<World> {
+    Server { temp: PhantomData, muh_msg: "Hullo".to_owned() }
   }
 
   pub fn start(self, addr: Option<&'static str>) -> ServerHandle
@@ -41,12 +46,15 @@ impl <World: Send + Sync> Server<World> {
       loop {
         let _ = stream.read_to_string(&mut body).unwrap();
         println!("Recv: {}", body);
+        // TODO: VOODOO
+        // 
         let _ = stream.write(b"[\"success\", []]");
       }
     })
   }
 
 }
+/*
 
 #[cfg(test)]
 mod test {

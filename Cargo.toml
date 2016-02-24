@@ -6,6 +6,7 @@ authors = ["Alex McArther <acmcarther@gmail.com>"]
 [dependencies]
 regex = "*"
 hyper = "*"
+rustc-serialize = "*"
 
 [[example]]
 name = "calculator"
