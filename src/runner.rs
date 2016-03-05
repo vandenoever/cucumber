@@ -1,89 +1,89 @@
-/*
-use cucumber::{ Step, Cucumber, MatchError, CucumberRegistrar };
-use regex::Regex;
+use cucumber::{Step, Regex, Cucumber, CucumberRegistrar};
+use cucumber::{Request, Response, StepMatchesResponse};
+
+use std::str::FromStr;
+use std::ascii::AsciiExt;
 
 pub use cucumber::helpers::r;
 
-pub type ExecuteResult = Result<(), ExecuteError>;
-
 #[allow(dead_code)]
-#[derive(Debug, Eq, PartialEq)]
-pub enum ExecuteError {
-  ExecuteFailure,
-  MatchFailure(MatchError)
-}
-
-#[allow(dead_code)]
-pub struct Runner<World> {
+pub struct WorldRunner<World> {
   cuke: Cucumber<World>,
-  world: World
+  world: World,
+  tags: Vec<String>
 }
 
-#[allow(dead_code)]
-impl <World> Runner<World> {
-  pub fn new(world: World) -> Runner<World> {
-    Runner {
+impl <World> WorldRunner<World> {
+  #[allow(dead_code)]
+  pub fn new(world: World) -> WorldRunner<World> {
+    WorldRunner {
       cuke: Cucumber::new(),
-      world: world
+      world: world,
+      tags: Vec::new()
     }
   }
+}
 
-  pub fn world(&mut self) -> &mut World {
-    &mut self.world
+pub trait CommandRunner {
+  fn execute_cmd(&mut self, req: Request) -> Response;
+}
+
+impl <T: Fn(Request) -> Response> CommandRunner for T {
+  fn execute_cmd(&mut self, req: Request) -> Response {
+    self(req)
   }
+}
 
-  pub fn cuke(&mut self) -> &mut Cucumber<World> {
-    &mut self.cuke
-  }
-
-  pub fn execute_given(&mut self, str: &str) -> ExecuteResult {
-    match self.cuke.match_given(str) {
-      Ok((captures, step)) => {
-        step(&mut self.world, captures);
-        Ok(())
+impl <World> CommandRunner for WorldRunner<World> {
+  fn execute_cmd(&mut self, req: Request) -> Response {
+    match req {
+      Request::BeginScenario(params) => {
+        self.tags = params.tags;
+        Response::BeginScenario
       },
-      Err(error) => {
-        Err(ExecuteError::MatchFailure(error))
-      }
-    }
-  }
-
-  pub fn execute_when(&mut self, str: &str) -> ExecuteResult {
-    match self.cuke.match_when(str) {
-      Ok((captures, step)) => {
-        step(&mut self.world, captures);
-        Ok(())
+      Request::Invoke(params) => {
+        let step = self.cuke.step(u32::from_str(&params.id).unwrap()).unwrap();
+        Response::Invoke(step(&mut self.world, params.args))
       },
-      Err(error) => {
-        Err(ExecuteError::MatchFailure(error))
-      }
-    }
-  }
-
-  pub fn execute_then(&mut self, str: &str) -> ExecuteResult {
-    match self.cuke.match_then(str) {
-      Ok((captures, step)) => {
-        step(&mut self.world, captures);
-        Ok(())
+      Request::StepMatches(params) => {
+        let matches = self.cuke.find_match(&params.name_to_match);
+        if matches.len() == 0 {
+          Response::StepMatches(StepMatchesResponse::NoMatch)
+        } else {
+          Response::StepMatches(StepMatchesResponse::Match(matches))
+        }
       },
-      Err(error) => {
-        Err(ExecuteError::MatchFailure(error))
+      Request::EndScenario(_) => {
+        self.tags = Vec::new();
+        Response::EndScenario
+      },
+      // TODO: For some reason, cucumber prints the ruby snippet too. Fix that
+      Request::SnippetText(params) => {
+        let command = params.step_keyword.to_ascii_lowercase();
+        let text =
+          format!("// In a step registration block where cuke: &mut CucumberRegistrar<YourWorld>\
+          \n{}!(cuke, r(\"^{}$\"), Box::new(move |ref mut world, mut captures| {{ \
+          \n  InvokeResponse::pending(\"TODO\") \
+          \n}}));\
+          ", command, params.step_name);
+
+        Response::SnippetText(text)
       }
     }
   }
 }
 
-impl <World> CucumberRegistrar<World> for Runner<World> {
-  fn given(&mut self, regex: Regex, step: Step<World>) {
-    self.cuke.given(regex, step)
+impl <World> CucumberRegistrar<World> for WorldRunner<World> {
+  fn given(&mut self, file: &str, line: u32, regex: Regex, step: Step<World>) {
+    self.cuke.given(file, line, regex, step)
   }
 
-  fn when(&mut self, regex: Regex, step: Step<World>) {
-    self.cuke.when(regex, step)
+  fn when(&mut self, file: &str, line: u32, regex: Regex, step: Step<World>) {
+    self.cuke.when(file, line, regex, step)
   }
 
-  fn then(&mut self, regex: Regex, step: Step<World>) {
-    self.cuke.then(regex, step)
+  fn then(&mut self, file: &str, line: u32, regex: Regex, step: Step<World>) {
+    self.cuke.then(file, line, regex, step)
   }
 }
 
@@ -91,56 +91,23 @@ impl <World> CucumberRegistrar<World> for Runner<World> {
 #[cfg(test)]
 mod test {
   use super::*;
-  use cucumber::MatchError;
   use cucumber::CucumberRegistrar;
+  use cucumber::InvokeResponse;
 
   #[test]
   fn runner_instantiates() {
-    let _: Runner<u32> = Runner::new(0);
+    let _: WorldRunner<u32> = WorldRunner::new(0);
   }
 
   #[test]
-  fn runner_executes_steps() {
+  fn runner_registers_steps() {
     let world: u32 = 0;
-    let mut runner = Runner::new(world);
+    let mut runner = WorldRunner::new(world);
 
-    runner.when(r("^I increment my world$"), Box::new(move |world, _| {
-      *world = *world + 1
+    runner.when(file!(), line!(), r("^I increment my world$"), Box::new(move |world, _| {
+      *world = *world + 1;
+      InvokeResponse::Success
     }));
-
-    let result = runner.execute_when("I increment my world");
-
-    assert!(result.is_ok());
-    assert_eq!(*runner.world(), 1);
   }
 
-  /* TODO
-  #[test]
-  fn runner_fails_when_step_fails() {
-  }
-  */
-
-  #[test]
-  fn runner_fails_when_ambiguous() {
-    let world: u32 = 0;
-    let mut runner = Runner::new(world);
-
-    runner.when(r("^I match"), Box::new(move |_, _| {}));
-    runner.when(r("two things$"), Box::new(move |_, _| {}));
-
-    let result = runner.execute_when("I match two things");
-
-    assert_eq!(result, Err(ExecuteError::MatchFailure(MatchError::SeveralMatchingSteps)));
-  }
-
-  #[test]
-  fn runner_fails_when_no_matches() {
-    let world: u32 = 0;
-    let mut runner = Runner::new(world);
-
-    let result = runner.execute_when("I match no things");
-
-    assert_eq!(result, Err(ExecuteError::MatchFailure(MatchError::NoMatchingSteps)));
-  }
 }
-*/

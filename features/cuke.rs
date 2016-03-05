@@ -1,5 +1,5 @@
 #[macro_use]
-extern crate cucumber;
+pub extern crate cucumber;
 
 mod step_definitions;
 mod support;
@@ -7,25 +7,27 @@ mod support;
 use cucumber::{ WorldRunner, Server };
 use cucumber::helpers::cucumber_command;
 
-use support::env::CalculatorWorld;
-use step_definitions::calculator_steps;
-use step_definitions::display_steps;
+use support::env::CucumberWorld;
+use step_definitions::cucumber_steps;
 
-fn main() {
-  let mut runner = WorldRunner::new(CalculatorWorld::new());
+use std::process::ExitStatus;
+
+#[test]
+fn cucumber() {
+  let mut runner = WorldRunner::new(CucumberWorld);
 
   // Register all steps
-  calculator_steps::register_steps(&mut runner);
-  display_steps::register_steps(&mut runner);
+  cucumber_steps::register_steps(&mut runner);
 
   let server = Server::new(runner);
   let listener = server.start(Some("0.0.0.0:7878"));
 
-  cucumber_command()
-    .current_dir("./examples/calculator")
+  let status = cucumber_command()
     .spawn()
     .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) })
     .wait().unwrap();
 
   let _ = listener.wait();
+
+  assert!(status.success())
 }

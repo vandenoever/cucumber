@@ -6,8 +6,16 @@ authors = ["Alex McArther <acmcarther@gmail.com>"]
 [dependencies]
 regex = "*"
 hyper = "*"
-rustc-serialize = "*"
+serde = "*"
+serde_macros = "*"
+serde_json = "*"
 
 [[example]]
 name = "calculator"
 path = "examples/calculator/features/cuke.rs"
+
+[[test]]
+name = "cucumber"
+path = "features/cuke.rs"
+
+
