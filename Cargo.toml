@@ -12,10 +12,10 @@ serde_json = "*"
 
 [[example]]
 name = "calculator"
-path = "examples/calculator/features/cuke.rs"
+path = "./examples/calculator/features/cuke.rs"
 
 [[test]]
 name = "cucumber"
-path = "features/cuke.rs"
+path = "./features/cuke.rs"
 
 

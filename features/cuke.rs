@@ -10,8 +10,6 @@ use cucumber::helpers::cucumber_command;
 use support::env::CucumberWorld;
 use step_definitions::cucumber_steps;
 
-use std::process::ExitStatus;
-
 #[test]
 fn cucumber() {
   let mut runner = WorldRunner::new(CucumberWorld);
