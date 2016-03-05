@@ -1,7 +1,12 @@
-# Cucumber-RS
+# Cucumber-rs
+
+[![Build Status](https://travis-ci.org/acmcarther/cucumber-rs.svg?branch=master)](https://travis-ci.org/acmcarther/cucumber-rs)
 
 ## Running Cucumber
-cargo script cuke.rs
+cargo test
+
+## Running Example
+cargo run --example calculator
 
 ## TODO:
 - Proper treatment of tags
