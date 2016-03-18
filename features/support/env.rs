@@ -1,11 +1,11 @@
-use cucumber::state::Cucumber;
+use cucumber::matcher::Matcher;
 
 pub struct CucumberWorld {
-  pub cucumber: Cucumber<u32>
+  pub matcher: Matcher<u32>
 }
 
 impl CucumberWorld {
   pub fn new() -> CucumberWorld {
-    CucumberWorld { cucumber: Cucumber::new() }
+    CucumberWorld { matcher: Matcher::new() }
   }
 }

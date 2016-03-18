@@ -8,17 +8,17 @@ use response::Step as ResponseStep;
 use request::InvokeArgument;
 use definitions::{Step, StepId};
 
-pub struct Cucumber<World> {
+pub struct Matcher<World> {
   step_regexes: Vec<Regex>,
   step_ids: HashMap<String, (StepId, String)>,
   steps: HashMap<StepId, Step<World>>,
   pub tags: Vec<String>
 }
 
-impl <World> Cucumber<World> {
+impl <World> Matcher<World> {
 
-  pub fn new() -> Cucumber<World> {
-    Cucumber {
+  pub fn new() -> Matcher<World> {
+    Matcher {
       step_regexes: Vec::new(),
       step_ids: HashMap::new(),
       steps: HashMap::new(),
@@ -92,61 +92,61 @@ mod test {
   use response::Step as ResponseStep;
 
   #[test]
-  fn cuke_instantiates() {
+  fn matcher_instantiates() {
     type World = u32;
 
-    let _: Cucumber<World> = Cucumber::new();
+    let _: Matcher<World> = Matcher::new();
   }
 
   #[test]
-  fn cuke_inserts_step() {
+  fn matcher_inserts_step() {
     type World = u32;
 
-    let mut cucumber: Cucumber<World> = Cucumber::new();
-    cucumber.insert_step("file:line".to_owned(), regex::build("^example$"), Box::new(|_, _, _| { InvokeResponse::Success }));
+    let mut matcher: Matcher<World> = Matcher::new();
+    matcher.insert_step("file:line".to_owned(), regex::build("^example$"), Box::new(|_, _, _| { InvokeResponse::Success }));
   }
 
   #[test]
-  fn cuke_invokes() {
+  fn matcher_invokes() {
     type World = u32;
 
     let mut world = 0;
 
-    let mut cucumber: Cucumber<World> = Cucumber::new();
-    cucumber.insert_step("file:line".to_owned(), regex::build("^example$"), Box::new(|_, _, _| { InvokeResponse::Success }));
-    assert_eq!(cucumber.invoke("example", &mut world, None), InvokeResponse::Success);
+    let mut matcher: Matcher<World> = Matcher::new();
+    matcher.insert_step("file:line".to_owned(), regex::build("^example$"), Box::new(|_, _, _| { InvokeResponse::Success }));
+    assert_eq!(matcher.invoke("example", &mut world, None), InvokeResponse::Success);
   }
 
   #[test]
-  fn cuke_invoke_fails_on_multiple_match() {
+  fn matcher_invoke_fails_on_multiple_match() {
     type World = u32;
 
     let mut world = 0;
 
-    let mut cucumber: Cucumber<World> = Cucumber::new();
-    cucumber.insert_step("file:line".to_owned(), regex::build("^example$"), Box::new(|_, _, _| { InvokeResponse::Success }));
-    cucumber.insert_step("file:line".to_owned(), regex::build("^ex"), Box::new(|_, _, _| { InvokeResponse::Success }));
-    assert_eq!(cucumber.invoke("example", &mut world, None), InvokeResponse::with_fail_message("Direct invoke matched more than one step"));
+    let mut matcher: Matcher<World> = Matcher::new();
+    matcher.insert_step("file:line".to_owned(), regex::build("^example$"), Box::new(|_, _, _| { InvokeResponse::Success }));
+    matcher.insert_step("file:line".to_owned(), regex::build("^ex"), Box::new(|_, _, _| { InvokeResponse::Success }));
+    assert_eq!(matcher.invoke("example", &mut world, None), InvokeResponse::with_fail_message("Direct invoke matched more than one step"));
   }
 
   #[test]
-  fn cuke_invoke_fails_on_no_match() {
+  fn matcher_invoke_fails_on_no_match() {
     type World = u32;
 
     let mut world = 0;
 
-    let cucumber: Cucumber<World> = Cucumber::new();
-    assert_eq!(cucumber.invoke("example", &mut world, None), InvokeResponse::with_fail_message("Direct invoke matched no steps"));
+    let matcher: Matcher<World> = Matcher::new();
+    assert_eq!(matcher.invoke("example", &mut world, None), InvokeResponse::with_fail_message("Direct invoke matched no steps"));
   }
 
   #[test]
-  fn find_match_optional_args_work() {
+  fn matcher_match_optional_args_work() {
     type World = u32;
 
-    let mut cucumber: Cucumber<World> = Cucumber::new();
-    cucumber.insert_step("file:line".to_owned(), regex::build("^example( stuff)? (\\d+)$"), Box::new(|_, _, _| { InvokeResponse::Success }));
+    let mut matcher: Matcher<World> = Matcher::new();
+    matcher.insert_step("file:line".to_owned(), regex::build("^example( stuff)? (\\d+)$"), Box::new(|_, _, _| { InvokeResponse::Success }));
     {
-      let mut step_matches = cucumber.find_match("example 5");
+      let mut step_matches = matcher.find_match("example 5");
       assert_eq!(step_matches.len(), 1);
       let step_details = step_matches.pop().unwrap();
       assert_eq!(step_details, ResponseStep {
@@ -159,7 +159,7 @@ mod test {
       })
     }
     {
-      let mut step_matches = cucumber.find_match("example stuff 5");
+      let mut step_matches = matcher.find_match("example stuff 5");
       assert_eq!(step_matches.len(), 1);
       let step_details = step_matches.pop().unwrap();
       assert_eq!(step_details, ResponseStep {

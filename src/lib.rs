@@ -15,7 +15,7 @@ pub mod request;
 pub mod response;
 pub mod runner;
 pub mod regex;
-pub mod state;
+pub mod matcher;
 
 pub use runner::WorldRunner;
 pub use server::Server;

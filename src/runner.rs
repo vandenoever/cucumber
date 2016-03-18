@@ -1,5 +1,5 @@
 use external_regex::Regex;
-use state::Cucumber;
+use matcher::Matcher;
 use request::Request;
 use response::{Response, StepMatchesResponse};
 use definitions::Step;
@@ -9,7 +9,7 @@ use std::str::FromStr;
 
 #[allow(dead_code)]
 pub struct WorldRunner<World> {
-  cuke: Cucumber<World>,
+  matcher: Matcher<World>,
   world: World,
 }
 
@@ -17,7 +17,7 @@ impl <World> WorldRunner<World> {
   #[allow(dead_code)]
   pub fn new(world: World) -> WorldRunner<World> {
     WorldRunner {
-      cuke: Cucumber::new(),
+      matcher: Matcher::new(),
       world: world,
     }
   }
@@ -37,15 +37,15 @@ impl <World> CommandRunner for WorldRunner<World> {
   fn execute_cmd(&mut self, req: Request) -> Response {
     match req {
       Request::BeginScenario(params) => {
-        self.cuke.tags = params.tags;
+        self.matcher.tags = params.tags;
         Response::BeginScenario
       },
       Request::Invoke(params) => {
-        let step = self.cuke.step(u32::from_str(&params.id).unwrap()).unwrap();
-        Response::Invoke(step(&self.cuke, &mut self.world, params.args))
+        let step = self.matcher.step(u32::from_str(&params.id).unwrap()).unwrap();
+        Response::Invoke(step(&self.matcher, &mut self.world, params.args))
       },
       Request::StepMatches(params) => {
-        let matches = self.cuke.find_match(&params.name_to_match);
+        let matches = self.matcher.find_match(&params.name_to_match);
         if matches.len() == 0 {
           Response::StepMatches(StepMatchesResponse::NoMatch)
         } else {
@@ -53,7 +53,7 @@ impl <World> CommandRunner for WorldRunner<World> {
         }
       },
       Request::EndScenario(_) => {
-        self.cuke.tags = Vec::new();
+        self.matcher.tags = Vec::new();
         Response::EndScenario
       },
       // TODO: For some reason, cucumber prints the ruby snippet too. Fix that
@@ -75,15 +75,15 @@ impl <World> CommandRunner for WorldRunner<World> {
 
 impl <World> CucumberRegistrar<World> for WorldRunner<World> {
   fn given(&mut self, file: &str, line: u32, regex: Regex, step: Step<World>) {
-    self.cuke.given(file, line, regex, step)
+    self.matcher.given(file, line, regex, step)
   }
 
   fn when(&mut self, file: &str, line: u32, regex: Regex, step: Step<World>) {
-    self.cuke.when(file, line, regex, step)
+    self.matcher.when(file, line, regex, step)
   }
 
   fn then(&mut self, file: &str, line: u32, regex: Regex, step: Step<World>) {
-    self.cuke.then(file, line, regex, step)
+    self.matcher.then(file, line, regex, step)
   }
 }
 
