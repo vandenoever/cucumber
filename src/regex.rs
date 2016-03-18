@@ -1,7 +1,7 @@
-use regex::Regex;
+use external_regex::Regex;
 
 #[allow(dead_code)]
-pub fn r(str: &'static str) -> Regex {
+pub fn build(str: &'static str) -> Regex {
   Regex::new(str).unwrap()
 }
 
@@ -11,7 +11,7 @@ mod test {
 
   #[test]
   fn it_makes_a_regex() {
-    let regex = r("^Hello Regex$");
+    let regex = build("^Hello Regex$");
     assert!(regex.is_match("Hello Regex"));
   }
 }

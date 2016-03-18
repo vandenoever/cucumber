@@ -1,0 +1,21 @@
+use serde::Serialize;
+
+#[derive(Serialize, Eq, PartialEq, Clone, Debug)]
+pub struct Step {
+  pub id: String,
+  pub args: Vec<StepArg>,
+  pub source: String,
+}
+
+#[derive(Serialize, Eq, PartialEq, Clone, Debug)]
+pub struct FailMessage {
+  message: String,
+  exception: String
+}
+
+impl FailMessage {
+  pub fn new(str: String) -> FailMessage{
+    FailMessage { message: str, exception: "".to_owned() }
+  }
+}
+

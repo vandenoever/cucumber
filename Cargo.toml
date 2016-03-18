@@ -2,20 +2,29 @@
 name = "cucumber"
 version = "0.1.0"
 authors = ["Alex McArther <acmcarther@gmail.com>"]
+build = "build.rs"
+
+[features]
+default = ["serde_codegen"]
+nightly = ["serde_macros"]
+
+[build-dependencies]
+serde_codegen = { version = "*", optional = true }
+syntex = "*"
+itertools = "*"
 
 [dependencies]
+itertools = "*"
 regex = "*"
 hyper = "*"
 serde = "*"
-serde_macros = "*"
 serde_json = "*"
+serde_macros = { version = "*", optional = true }
 
 [[example]]
 name = "calculator"
 path = "./examples/calculator/features/cuke.rs"
 
-[[test]]
-name = "cucumber"
+[[example]]
+name = "cuke"
 path = "./features/cuke.rs"
-
-

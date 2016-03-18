@@ -1,0 +1,39 @@
+use serde::Deserialize;
+
+// ["step_matches", {"name_to_match": "we're all wired"}]
+#[derive(Deserialize, Eq, PartialEq, Clone, Debug)]
+pub struct StepMatchesRequest {
+  pub name_to_match: String
+}
+
+// ["invoke", {"id":"1", "args": []}]
+// ["invoke", {"id":"1", "args": ["wired"]}]
+// ["invoke", {"id":"1", "args": ["we're",[["wired"],["high"],["happy"]]]}]
+#[derive(Deserialize, Eq, PartialEq, Clone, Debug)]
+pub struct InvokeRequest {
+  pub id: String,
+  pub args: Vec<InvokeArgument>,
+}
+
+// ["begin_scenario"]
+// ["begin_scenario", {"tags":["bar","baz","foo"]}]
+#[derive(Deserialize, Eq, PartialEq, Clone, Debug)]
+pub struct BeginScenarioRequest {
+  pub tags: Vec<String>
+}
+
+
+// ["end_scenario"]]
+// ["end_scenario", {"tags":["bar","baz","foo"]}]
+#[derive(Deserialize, Eq, PartialEq, Clone, Debug)]
+pub struct EndScenarioRequest {
+  pub tags: Vec<String>
+}
+
+// ["snippet_text", {"step_keyword": "Given", "multiline_arg_class":"", "step_name":"we're all wired"}]
+#[derive(Deserialize, Eq, PartialEq, Clone, Debug)]
+pub struct SnippetTextRequest {
+  pub step_keyword: String,
+  pub multiline_arg_class: String,
+  pub step_name: String
+}
