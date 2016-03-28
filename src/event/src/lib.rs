@@ -3,5 +3,8 @@
 
 extern crate serde;
 
+#[cfg(test)]
+extern crate serde_json;
+
 pub mod request;
 pub mod response;
