@@ -31,7 +31,7 @@ pub type StepId = u32;
 /// execute steps. It also maintains the current tags
 ///
 /// This struct is typically only used directly when invoking steps from other steps, as in the
-/// example. Otherwise, it is managed by the [WorldRunner](../runner/struct.WorldRunner.html)
+/// example. Otherwise, it is managed by the [WorldRunner](runner/struct.WorldRunner.html)
 ///
 /// # Example
 ///

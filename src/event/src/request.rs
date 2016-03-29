@@ -105,7 +105,7 @@ impl Visitor for RequestVisitor {
 /// The low level type capturing the possible values a step may provide.
 ///
 /// Normal regex arguments as well as docstrings come in the form of the String variant. Conversion
-/// to other types is done at later stages. Tables are represented as Vec<Vec<String>>
+/// to other types is done at later stages. Tables are represented as `Vec<Vec<String>>`
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum InvokeArgument {
   String(String),
