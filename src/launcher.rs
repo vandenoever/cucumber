@@ -7,10 +7,45 @@ use std::process::{self, Command, Stdio};
 use std::thread;
 use std::time::Duration;
 
+/// Starts a Cucumber server and the Ruby client
+///
+/// # Example
+/// ```no_run
+/// #[macro_use]
+/// extern crate cucumber;
+///
+///
+/// mod button_steps {
+///   use cucumber::CucumberRegistrar;
+///   pub fn register_steps(c: &mut CucumberRegistrar<u32>) {
+///   }
+/// }
+///
+/// mod widget_steps {
+///   use cucumber::CucumberRegistrar;
+///   pub fn register_steps(c: &mut CucumberRegistrar<u32>) {
+///   }
+/// }
+///
+/// fn main() {
+///   let world: u32 = 0;
+///
+///   cucumber::start(
+///     world,
+///     &[
+///       &button_steps::register_steps,
+///       &widget_steps::register_steps,
+///     ]
+///   );
+/// }
+/// ```
+///
 pub fn start<W: Send + 'static>(world: W, register_fns: &[&Fn(&mut CucumberRegistrar<W>)]) {
   start_with_addr("0.0.0.0:7878", world, register_fns)
 }
 
+/// Start a Cucumber server, with an ip and port, see the [`start() method`][start].
+/// [start]: fn.start.html
 #[allow(unused_variables)]
 pub fn start_with_addr<W: Send + 'static>(addr: &'static str, world: W, register_fns: &[&Fn(&mut CucumberRegistrar<W>)]) {
   let mut runner = WorldRunner::new(world);
@@ -37,6 +72,7 @@ pub fn start_with_addr<W: Send + 'static>(addr: &'static str, world: W, register
   process::exit(status.code().unwrap());
 }
 
+/// Build a command to execute the Ruby Cucumber Server
 pub fn ruby_command() -> Command {
   let mut command = Command::new("cucumber");
   command.stdout(Stdio::inherit());
