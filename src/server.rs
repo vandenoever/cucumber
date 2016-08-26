@@ -93,7 +93,7 @@ impl<R: CommandRunner + Send> Server<R> {
   pub fn start(mut self, addr: Option<&'static str>) -> (JoinHandle<()>, Sender<()>)
     where R: 'static
   {
-    let addr = addr.unwrap_or("0.0.0.0:7878");
+    let addr = addr.unwrap_or("127.0.0.1:7878");
     let (stop_tx, stop_rx) = channel();
     let main_barrier = Arc::new(Barrier::new(2));
     let tcp_barrier = main_barrier.clone();
@@ -162,8 +162,8 @@ mod test {
   #[test]
   fn it_makes_a_server() {
     let server = Server::new(|_| Response::BeginScenario);
-    let (handle, stop_tx) = server.start(Some("0.0.0.0:1234"));
-    let _ = TcpStream::connect("0.0.0.0:1234").unwrap();
+    let (handle, stop_tx) = server.start(Some("127.0.0.1:1234"));
+    let _ = TcpStream::connect("127.0.0.1:1234").unwrap();
 
     stop_tx.send(()).unwrap();
     handle.join().unwrap();
@@ -180,8 +180,8 @@ mod test {
         Request::SnippetText(_) => Response::SnippetText("Snippet".to_owned()),
       }
     });
-    let (handle, stop_tx) = server.start(Some("0.0.0.0:1235"));
-    let mut stream = TcpStream::connect("0.0.0.0:1235").unwrap();
+    let (handle, stop_tx) = server.start(Some("127.0.0.1:1235"));
+    let mut stream = TcpStream::connect("127.0.0.1:1235").unwrap();
 
     {
       stream.write(b"[\"begin_scenario\"]\n").unwrap();

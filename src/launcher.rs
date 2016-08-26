@@ -42,7 +42,7 @@ use std::env;
 /// ```
 ///
 pub fn start<W: Send + 'static>(world: W, register_fns: &[&Fn(&mut CucumberRegistrar<W>)]) {
-  start_with_addr("0.0.0.0:7878", world, register_fns)
+  start_with_addr("127.0.0.1:7878", world, register_fns)
 }
 
 /// Start a Cucumber server, with an ip and port, see the [`start()
