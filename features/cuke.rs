@@ -3,6 +3,7 @@ extern crate cucumber;
 
 extern crate tempdir;
 extern crate itertools;
+extern crate walkdir;
 
 mod step_definitions;
 mod support;

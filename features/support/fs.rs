@@ -1,9 +1,12 @@
-use tempdir::TempDir;
-use std::io::{self, Write};
-use std::fs::{DirBuilder, File};
-use std::env;
-use std::process::Command;
 use itertools::Itertools;
+use std::env;
+use std::fmt::Display;
+use std::fs::{self, DirBuilder, File};
+use std::io::{self, Write};
+use std::path::{Path, PathBuf};
+use std::process::Command;
+use tempdir::TempDir;
+use walkdir::WalkDir;
 
 pub struct Project {
   dir: TempDir,
@@ -97,6 +100,10 @@ pub fn create_project() -> io::Result<Project> {
 }
 
 fn create_cargo_toml(dir: TempDir) -> io::Result<TempDir> {
+  fn double_backslash<T: Display>(path: T) -> String {
+    path.to_string().replace(r"\", r"\\")
+  }
+
   File::create(dir.path().join("Cargo.toml"))
     .and_then(|mut file| {
       file.write(format!("
@@ -112,7 +119,7 @@ fn create_cargo_toml(dir: TempDir) -> io::Result<TempDir> {
         path = \"./features/cuke.rs\"
         harness = false
       ",
-                         env::current_dir().unwrap().display())
+                         double_backslash(try!(env::current_dir()).display()))
         .as_bytes())
 
     })
@@ -165,13 +172,22 @@ fn create_features(dir: TempDir) -> io::Result<TempDir> {
 }
 
 fn bootstrap_target(dir: TempDir) -> io::Result<TempDir> {
-  // TODO: consider a solution using standard Rust
-  Command::new("cp")
-    .arg(env::current_dir().unwrap().join("target"))
-    .arg(dir.path().join("target"))
-    .arg("-r")
-    .output()
+  copy_recursively(&env::current_dir().unwrap().join("target"),
+                   &dir.path().join("target"))
     .map(|_| dir)
+}
+
+fn copy_recursively(origin_base: &Path, target_base: &Path) -> io::Result<u64> {
+  WalkDir::new(origin_base).into_iter().filter_map(|e| e.ok()).fold(Ok(0), |sum, entry| {
+    if entry.path().is_file() {
+      let relative = entry.path().strip_prefix(origin_base).unwrap();
+      let target = target_base.join(relative);
+      let _ = fs::create_dir_all(target.parent().unwrap());
+      fs::copy(&entry.path(), &target).map(|_| sum.unwrap() + 1)
+    } else {
+      fs::create_dir_all(entry.path()).and_then(|_| sum)
+    }
+  })
 }
 
 fn build_project(dir: TempDir) -> Project {
