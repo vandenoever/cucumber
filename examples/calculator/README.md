@@ -7,10 +7,10 @@ This is the typical directory Cucumber code is placed in. For now, this structur
 
   - `/features/step_definitions`:
   This is the typical directory Cucumber step definitions are placed in. This example places them here in a module.
-    - `/features/step_defintions/cucumber_rust.wire`:
+    - `/features/step_definitions/cucumber_rust.wire`:
     This is a mandatory file that indicates to Ruby Cucumber that there is a server out there to handle executing our steps. That's this library!
 
-    - `/features/step_defintions/*.rs`:
+    - `/features/step_definitions/*.rs`:
     These are the modules our step definitions live in. This organization strategy is not mandatory.
 
   - `/features/support`:
